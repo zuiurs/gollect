@@ -180,7 +180,6 @@ func (oauth *OAuth) generateAuthHeaderParam(reqURL, method, token, tokenSecret s
 	}
 
 	// build signature base string as data
-	// TODO: HTTP method should be variable
 	requestElem := []string{method, reqURL, values.Encode()}
 	var signatureBaseString string
 	for i, s := range requestElem {
