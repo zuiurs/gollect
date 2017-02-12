@@ -16,9 +16,9 @@ import (
 const (
 	// PhaseRequestToken shows this phase is OAuth Request Token
 	PhaseRequestToken Phase = 1 << iota
-	// PhaseAccessToken shows this phase is OAuth Request Token
+	// PhaseAccessToken shows this phase is OAuth Access Token
 	PhaseAccessToken
-	// PhaseAuthorized shows this phase is OAuth Request Token
+	// PhaseAuthorized shows this phase is after authorized your Twitter client.
 	PhaseAuthorized
 )
 
