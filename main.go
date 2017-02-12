@@ -1,23 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/zuiurs/gollect/oauth1"
+	"github.com/zuiurs/gollect/twitter"
+	"io"
 	"os"
 )
 
 var (
 	settingFileName string
-)
-
-const (
-	SignatureMethod = "HMAC-SHA1"
-	OAuthVersion    = "1.0"
-	CallbackURL     = "oob"
-	RequestTokenURL = "https://api.twitter.com/oauth/request_token"
-	AccessTokenURL  = "https://api.twitter.com/oauth/access_token"
-	AuthorizeURL    = "https://api.twitter.com/oauth/authorize"
 )
 
 func main() {
@@ -31,37 +24,32 @@ func main() {
 	}
 	defer f.Close()
 
-	oauth := &oauth1.OAuth{
-		OAuthVersion:         OAuthVersion,
-		OAuthCallbackURL:     CallbackURL,
-		OAuthSignatureMethod: SignatureMethod,
-		RequestTokenURL:      RequestTokenURL,
-		AccessTokenURL:       AccessTokenURL,
-		AuthorizeURL:         AuthorizeURL,
-	}
-	err = oauth.OAuthParseJson(f)
+	key, secret, err := OAuthSettingParseJson(f)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	reqToken, callbackURL, err := oauth.GetRequestTokenAndURL()
+	t, err := twitter.Authorize(key, secret)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Authorize URL: %s\n", callbackURL)
-	fmt.Printf("Enter PIN: ")
-	var pin string
-	fmt.Scan(&pin)
-	oauth.OAuthVerifier = pin
+	fmt.Println("%#v\n", t.AccessToken)
+}
 
-	accToken, err := oauth.GetAccessToken(reqToken)
-	if err != nil {
-		fmt.Fprint(os.Stderr, err)
-		os.Exit(1)
+func OAuthSettingParseJson(r io.Reader) (string, string, error) {
+	dec := json.NewDecoder(r)
+
+	var oauthSetting struct {
+		ConsumerKey    string `json:"consumer_key"`
+		ConsumerSecret string `json:"consumer_secret"`
 	}
-	oauth.AccessToken = accToken
-	fmt.Println("%#v\n", accToken)
+
+	if err := dec.Decode(&oauthSetting); err != nil {
+		return "", "", err
+	}
+
+	return oauthSetting.ConsumerKey, oauthSetting.ConsumerSecret, nil
 }

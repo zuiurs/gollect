@@ -4,9 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -48,16 +46,6 @@ type OAuthTokenSet struct {
 
 type RequestToken OAuthTokenSet
 type AccessToken OAuthTokenSet
-
-func (oauth *OAuth) OAuthParseJson(r io.Reader) error {
-	dec := json.NewDecoder(r)
-
-	if err := dec.Decode(oauth); err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func (oauth *OAuth) GetRequestTokenAndURL() (*RequestToken, string, error) {
 	endp := oauth.RequestTokenURL
