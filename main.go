@@ -24,7 +24,7 @@ func main() {
 	}
 	defer f.Close()
 
-	key, secret, err := OAuthSettingParseJson(f)
+	key, secret, err := OAuthSettingParseJSON(f)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
@@ -39,7 +39,12 @@ func main() {
 	fmt.Println("%#v\n", t.AccessToken)
 }
 
-func OAuthSettingParseJson(r io.Reader) (string, string, error) {
+// OAuthSettingParseJSON parses JSON data r,
+// and returns ConsumerKey and ConsumerSecret values.
+// r should contain below parameters.
+// - consumer_key
+// - consumer_secret
+func OAuthSettingParseJSON(r io.Reader) (string, string, error) {
 	dec := json.NewDecoder(r)
 
 	var oauthSetting struct {

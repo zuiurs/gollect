@@ -14,13 +14,18 @@ import (
 )
 
 const (
+	// PhaseRequestToken shows this phase is OAuth Request Token
 	PhaseRequestToken Phase = 1 << iota
+	// PhaseAccessToken shows this phase is OAuth Request Token
 	PhaseAccessToken
+	// PhaseAuthorized shows this phase is OAuth Request Token
 	PhaseAuthorized
 )
 
+// Phase shows levels of OAuth request phase.
 type Phase int
 
+// OAuth has some OAuth parameters required in OAuth request phase.
 type OAuth struct {
 	//------- required Pre-fill -------
 	ConsumerKey    string `json:"consumer_key"`
@@ -39,14 +44,28 @@ type OAuth struct {
 	*AccessToken
 }
 
+// OAuthTokenSet has a set of token.
+// This set given by OAuth provider.
 type OAuthTokenSet struct {
 	OAuthToken       string
 	OAuthTokenSecret string
 }
 
+// TODO: Standardize RequestToken and AccessToken
+//       to OAuthTokenSet for generateAuthHeaderParam function.
+
+// RequestToken is wrapped struct of OAuthTokenSet.
+// This is used in RequestToken phase.
 type RequestToken OAuthTokenSet
+
+// AccessToken is wrapped struct of OAuthTokenSet.
+// This is used in AccessToken phase.
 type AccessToken OAuthTokenSet
 
+// GetRequestTokenAndURL gets RequestToken and CallbackURL
+// based on oauth instance's parameters.
+// If you set "oob" on CallbackURL,
+// then returned CallbackURL will be AuthorizeURL.
 func (oauth *OAuth) GetRequestTokenAndURL() (*RequestToken, string, error) {
 	endp := oauth.RequestTokenURL
 	method := "POST"
@@ -104,6 +123,8 @@ func (oauth *OAuth) GetRequestTokenAndURL() (*RequestToken, string, error) {
 	return &reqToken, callbackURL, nil
 }
 
+// GetAccessToken gets AccessToken based on oauth instance's parameters.
+// TODO: Return values contain user_id and screen_name. (Approach: make hashmap for other param)
 func (oauth *OAuth) GetAccessToken(reqToken *RequestToken) (*AccessToken, error) {
 	endp := oauth.AccessTokenURL
 	method := "POST"
@@ -150,6 +171,7 @@ func (oauth *OAuth) GetAccessToken(reqToken *RequestToken) (*AccessToken, error)
 	return &accToken, nil
 }
 
+// generateAuthHeaderParam returns Authorization Header value.
 func (oauth *OAuth) generateAuthHeaderParam(reqURL, method, token, tokenSecret string, phase Phase) string {
 	values := url.Values{}
 	values.Set("oauth_consumer_key", oauth.ConsumerKey)
