@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/zuiurs/gollect/twitter"
 	"io"
+	"log"
 	"os"
 )
 
@@ -19,21 +20,18 @@ func main() {
 
 	f, err := os.Open(settingFileName)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal("failed to open the file:", err)
 	}
 	defer f.Close()
 
 	key, secret, err := OAuthSettingParseJSON(f)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal("failed to parse json:", err)
 	}
 
 	t, err := twitter.Authorize(key, secret)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal("failed to authorize the client:", err)
 	}
 
 	fmt.Println("%#v\n", t.AccessToken)
